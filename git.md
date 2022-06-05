@@ -1,6 +1,6 @@
 1. git status 
 2. git add .
-3. git commit -m "v1_release"
+3. git commit -m "change internal css"
 4. git push -u origin master
 
 username: khinthuzaraung131

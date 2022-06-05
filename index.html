@@ -1,146 +1,217 @@
+<!DOCTYPE html>
 <html>
 
 <head>
     <title>Budget App</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* hide spin button of input number */
+        /* input[type=number]: -webkit-inner-spin-button,
+        input[type=number]: -webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        } */
+
+        main {
+            background-color: aliceblue;
+            height: 100%;
+        }
+
+        header {
+            background-color: aliceblue;
+            padding: 10px;
+            overflow: auto;
+        }
+
+        strong {
+            display: block;
+            font-size: 26px;
+            margin-bottom: 14px;
+        }
+        section {
+            float: left;
+            width: 50%;
+        }
+
+        img {
+            float: left;
+            margin-right: 12px;
+        }
+
+        #add-button {
+            padding: 8px;
+            background-color: aquamarine;
+            cursor: pointer;
+        }
+
+        .profile {
+            float:left;
+        }
+
+        /* show output results */
+        .result-screen {
+            text-align: center;
+            float: left;
+            width: 50%;
+        }
+
+        table {
+            width: 100%;
+        }
+
+        #modal-overlay {
+            display: none;
+            /* Hidden by default */
+            position:absolute;
+            /* stay in place */
+            z-index: 1;
+            /* Sit on top */
+            padding-top: 100px;
+            /* Location of the box */
+            left: 0;
+            top: 0;
+            width: 100%;
+            /* Full width */
+            height: 100%;
+            /* Full height */
+            background-color: rgba(0,0,0,0.4);
+            /* Black w/ opacity */
+        }
+
+        #modal-container {
+            margin: 0 auto;
+            background-color: antiquewhite;
+            width: 40%;
+            padding: 20px;
+        }
+
+        #close-button {
+            margin: 2px;
+            cursor: pointer;
+            padding: 10px;
+            float: right;
+        }
+        input {
+            width: 100%;
+            padding: 12px 20px;
+            margin: 8px 0;
+            display: block;
+            border: 1px sold #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        input[type='submit'] {
+            background-color: aliceblue;
+            padding: 10px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 
-<body>
-    <nav>
-        <h2>Logo</h2>
-        <form action="">
-            <input type="text">
-        </form>
-    </nav>
-    <div class="banner">
-        <div class="summary">
-            <h4>Expense Total</h4>
-            <h1>$4000</h1>
-            <h5><strong class="diff">+$40</strong> than last month</h5>
+<body onload="initiateExpenses()">
+    <main>
+        <header>
+            <strong>Logo Here</strong>
+            <section>
+                <img src="./assets/images/3.jpg" alt="" width="100" height="100">
+                <div class="profile">
+                    <h3>John Doe</h3>
+                    <button onClick="expenseModal()" id="add-button">ADD EXPENSE</button>
+                </div>
+            </section>
+            <section>
+                <h3>Total Budget</h3>
+                <h2 class="budget">100000 KS</h2>
+                <p class="budget">4 KS just for testing</p>
+            </section>
+        </header>
+        <hr/>
+        <div class="result-screen" id="expenseScreen">
+            <h2>Your Expenses</h2>
+            <table border="1" id="expenseTable">
+                <tr>
+                    <th>Title</th>
+                    <th>Amount</th>   
+                </tr>
+            </table>
         </div>
-    </div>
+        <!-- expenseModal -->
+        <div id="modal-overlay">
+            <div id="modal-container">
+              <button id="close-button" onClick="closeModal()">&times;</button>
+              <form action="#" onsubmit="addExpense()" id="expenseForm">
+                  <input type="text" id="title" required>
+                  <input type="number" id="amount" required>
+                  <input type="submit" />
+              </form>
+            </div>
+        </div>
+    </main>
 </body>
 
 </html>
-<style>
-    /* nav {
-        background-color: slategrey;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    } */
-    /* second */
-    /* nav {
-        background-color: slategrey;
-        overflow: auto;
+
+<script>
+    function expenseModal() {
+        let modal = document.getElementById('modal-overlay');
+        modal.style.display = 'block'
     }
-
-    h2 {
-        float: left;
+    function closeModal() {
+        let modal = document.getElementById('modal-overlay');
+        modal.style.display = 'none'
     }
-
-    form {
-        float: right;
-        padding: 20px;
-    } */
-    /* third */
-    /* nav {
-        background-color: slategrey;
-        width: 100%;
-        height: 60px;
+    // funtion expression
+    function addExpense() {
+        let expenseTitle = document.getElementById('title').value
+        let expenseAmount = document.getElementById('amount').value
+        // isNaN is not a number => return true/false
+        if (isNaN(expenseAmount)) {
+            window.alert("Invalid")
+            return;
+        }
+        let totalBudget = document.getElementsByClassName('budget');
+        totalBudget[0].innerHTML = parseInt(totalBudget[0].innerHTML.replace('KS', '')) -parseInt(expenseAmount) + ' KS'
+        // getElementsByTabName return array of selected tab name element
+        let newExpense = {
+            'title': expenseTitle,'amount': expenseAmount
+        }; //js object
+        let totalExpense = [];//js object (array)
+        if (localStorage.getItem('expenses')) {
+            totalExpense = JSON.parse(localStorage.getItem('expenses'))
+        }
+        totalExpense.push(newExpense)//js object (array)
+        console.log(totalExpense)// js object
+        window.localStorage.setItem("expenses",JSON.stringify(totalExpense));
+        appendToExpenses(newExpense)
+        document.getElementById('expenseForm').reset();
+        closeModal()
+        
     }
-
-    h2 {
-        float: left;
-        margin: 20px;
-
+    function initiateExpenses() {
+        let totalExpense = JSON.parse(localStorage.getItem('expenses')) || [] // [];
+        // check expenses length
+        if (totalExpense.length > 0) {
+            let expenseLegth = totalExpense.length;
+            for (i = 0;i< expenseLegth; i++) {
+                appendToExpenses(totalExpense[i]);
+            }
+        }
     }
+    function appendToExpenses(expenseObj) {
+        let expenseTable = document.getElementById('expenseTable');
+        let trElement = document.createElement('tr');
+        let titleTd = document.createElement('td');
+        let amountTd = document.createElement('td');
+        let title = document.createTextNode(expenseObj.title)
+        let amount = document.createTextNode(expenseObj.amount)
 
-    form {
-        float: right;
-        margin: 20px;
-    } */
+        titleTd.appendChild(title)
+        amountTd.appendChild(amount)
 
-    /* end third */
-    nav {
-        background-color: slategrey;
-        width: 100%;
-        height: 60px;
+        trElement.appendChild(titleTd)
+        trElement.appendChild(amountTd)
+
+        expenseTable.appendChild(trElement);
     }
-
-    h2 {
-        float: left;
-        margin: 20px;
-
-    }
-
-    form {
-        float: right;
-        margin: 10px;
-    }
-
-    input {
-        line-height: 30px;
-    }
-
-    /*  */
-    .banner {
-        background-color: cornflowerblue;
-        padding: 20px;
-    }
-
-    .summary {
-        color: aliceblue;
-    }
-
-    .diff {
-        color: brown;
-    }
-</style>
-
-<!--
-HTML DOM 
-Root
-Parent
-Child
-Sibling
-Decedent
-html is RootNode.
-head and body are child nodes of html.
-head and body are also sibling themselves.
-
-
-Inline Element 
-a,b,el,label,span,strong
-Parent element ထဲမှာ
-နေရာယူတဲ့အခါ 
-သူ့ children ရဲ့ အကျယ်အဝန်းရှိသလောက်ကိုပဲ နေရာယူပေးပါတယ်။
-Block Element
-Parent element ထဲမှာ
-နေရာယူတဲ့အခါ သူ့ child element အကျယ်အဝန်းကို ဘယ်လောက်ပဲရှိရှိ parent element က လက်ခံပေးနိုင်သလောက်အထိ 
-နေရာယူပါတယ်။
-Layout Element 
-content တွေကို အပိုင်းအခြားတခုစီ ခွဲခြားဖော်ပြဖို့ အတွက်သုံးပါတယ်။
-ရဲ့ ဒီဇိုင်းကိုလည်း အလှဆင် ပြောင်းလဲဖို့ အတွက်လွယ်ကူစေပါတယ်၊၊ အများသောအားဖြင့် ဒီ Element တွေဟာ Block Element တွေဖြစ်နေတတ်ပါတယ်။
-div
-header
-nav
-main
-section
-article
-aside
-footer
-table
-ul
-ol
-
-Formatting Elements
-b<=>strong
-i<=>em
-s<=>del
-code<=>pre
-sup-sub
-blockquote,
-address,
-time
-
-  -->
+</script>
